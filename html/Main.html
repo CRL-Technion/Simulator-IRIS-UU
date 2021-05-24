@@ -1,0 +1,295 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Main</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-09-18"><meta name="DC.source" content="Main.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Initilize;</a></li><li><a href="#3">Step</a></li><li><a href="#9">Post process</a></li></ul></div><pre class="codeinput">clc
+clear <span class="string">all</span>
+close <span class="string">all</span>
+<span class="comment">%</span>
+addpath <span class="string">InitFunction</span>
+addpath <span class="string">ServiceFunction</span>
+addpath <span class="string">Control</span>
+addpath <span class="string">Command</span>
+addpath <span class="string">PostProcess</span>
+addpath <span class="string">StepFunction</span>
+</pre><h2 id="2">Initilize;</h2><pre class="codeinput">ScenarioParameter = InitScenario;
+IMUParameters = InitIMU(ScenarioParameter);
+Quad = InitQuad;
+Control = InitControl;
+Command = InitCommand(ScenarioParameter.Rootfolder);
+[State,Command] = InitState(IMUParameters,Command,ScenarioParameter.ScenarioMode);
+[NavState,Command] = InitNavState(Command,State,ScenarioParameter);
+<span class="comment">%todo</span>
+Command.PoseSimulation = [State.X',State.psi,State.theta,NavState.theta,i];
+<span class="comment">%</span>
+EKF = InitEKF(NavState,IMUParameters,ScenarioParameter);
+DynamicStateParameter = InitDynamic(ScenarioParameter,State);
+SensorMeas = GetSensorMeas(DynamicStateParameter,IMUParameters);
+DynamicNavStateParameter = UpdateNavDynamic(SensorMeas,NavState);
+State = UpdateTrueIMUBias(SensorMeas,DynamicStateParameter,State);
+</pre><h2 id="3">Step</h2><pre class="codeinput">InitRecordParameter;<span class="comment">%[RecordState,RecordNavState,RecordEKF,RecordCommand,RecordScenarioParameter]= InitRecordParameter(State,NavState,EKF,1);</span>
+time = 0;
+t = 0;
+<span class="keyword">for</span> i=1:1:(ScenarioParameter.FinalTime/ScenarioParameter.dt)
+
+    <span class="comment">%   Update State</span>
+    State = UpdateState(ScenarioParameter,State,DynamicStateParameter.f_b,DynamicStateParameter.w_b);
+    NavState = UpdateNavState(ScenarioParameter,NavState,DynamicNavStateParameter.f_b,DynamicNavStateParameter.w_b,IMUParameters);
+
+    <span class="comment">%   EKF update</span>
+    ScenarioParameter.isGPSAvailable = checkGPSAvailable(State);
+    <span class="keyword">if</span> (ScenarioParameter.IdealIMU==0)
+        [NavState,EKF] = EKFStep(ScenarioParameter,NavState,State,DynamicNavStateParameter,EKF,i);
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> (ScenarioParameter.ScenarioMode&gt;0)<span class="comment">% not static</span>
+        <span class="comment">%   Implement Controller</span>
+        Control = UpdateControl(Control,NavState,Command.X_des_GF,Command.psi_des,DynamicNavStateParameter,Quad,ScenarioParameter.g,ScenarioParameter.dt);
+        Control.init=1;
+    <span class="keyword">end</span>
+    <span class="comment">%   DynamicsAndKinematic</span>
+    DynamicStateParameter = UpdateDynamic(ScenarioParameter,DynamicStateParameter,State,Control,Quad,time);
+    SensorMeas = GetSensorMeas(DynamicStateParameter,IMUParameters);
+    DynamicNavStateParameter = UpdateNavDynamic(SensorMeas,NavState);
+    State = UpdateTrueIMUBias(SensorMeas,DynamicStateParameter,State);
+
+    <span class="keyword">if</span> (Command.Finish_pose_command )
+        <span class="keyword">break</span>;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> (ScenarioParameter.ScenarioMode&gt;0)<span class="comment">% not static</span>
+
+        [Command,Control]=UpdateCommandAndInitlizeControl(State,Command,Control,NavState,ScenarioParameter.ScenarioMode,i);
+    <span class="keyword">end</span>
+<span class="comment">%         checkPOI;%Command = checkPOI(State,Environment,Command);</span>
+<span class="comment">%         CheckCollision;%Environment= CheckCollision(Environment,State,time);</span>
+
+    <span class="comment">%record</span>
+    RecordParameter
+    time = time+ScenarioParameter.dt;
+
+<span class="keyword">end</span>
+time = t;
+</pre><pre class="codeoutput">8.5714%
+11.4286%
+14.2857%
+17.1429%
+20%
+22.8571%
+25.7143%
+28.5714%
+31.4286%
+34.2857%
+37.1429%
+40%
+42.8571%
+45.7143%
+48.5714%
+51.4286%
+54.2857%
+57.1429%
+60%
+62.8571%
+65.7143%
+68.5714%
+71.4286%
+74.2857%
+77.1429%
+80%
+82.8571%
+85.7143%
+88.5714%
+91.4286%
+94.2857%
+97.1429%
+100%
+</pre><pre class="codeinput">thetaTrueSimulation = 0;
+thetaNavSimulation = 0;
+thetaCamera = 0;
+PoseUpdateTheta = zeros(1,5);
+<span class="keyword">for</span> i=1:1:length(Command.PoseSimulation)
+    thetaTrueSimulation(i) = Command.PoseSimulation(i,5);
+    thetaNavSimulation(i) = Command.PoseSimulation(i,6);
+    thetaCamera(i) = Command.Pose_des_GF(i,5) -  thetaNavSimulation(i) + thetaTrueSimulation(i);
+    PoseUpdateTheta(i,:) = [Command.PoseSimulation(i,1:4),thetaCamera(i)];
+<span class="keyword">end</span>
+</pre><p>[visiblePointSimulation,visiblePointIndexCellSimulation] = CountPOIs(PoseUpdateTheta,Environment,CameraParameter); length(unique(visiblePointSimulation)) [visiblePointIRIS,visiblePointIndexCellIRIS] = CountPOIs(Command.Pose_des_GF,Environment,CameraParameter); length(unique(visiblePointIRIS)) length(unique(visiblePointSimulation))/length(unique(visiblePointIRIS))</p><p>SaveResults =0; PlotEKFResult(RecordState,RecordNavState,RecordEKF,IMUParameters,t,SaveResults); % plotDataNew(RecordState,RecordNavState,Command,RecordCommand,RecordScenarioParameter,IMUParameters,ScenarioParameter,t);</p><pre class="codeinput">plotDataNew
+<span class="comment">% save([pwd,'\Results\RecordResult'])</span>
+</pre><img vspace="5" hspace="5" src="Main_01.png" alt=""> <img vspace="5" hspace="5" src="Main_02.png" alt=""> <img vspace="5" hspace="5" src="Main_03.png" alt=""> <img vspace="5" hspace="5" src="Main_04.png" alt=""> <img vspace="5" hspace="5" src="Main_05.png" alt=""> <h2 id="9">Post process</h2><pre class="codeinput"><span class="comment">% Environment = GetEnvironmentMission(ScenarioParameter.Rootfolder);</span>
+<span class="comment">% CameraParameter = InitCamera;</span>
+<span class="comment">% [POIInspectedCell,collisionCheck] = GetInspectedPOIandCollision(ScenarioParameter.Rootfolder);</span>
+</pre><pre>Plot_Trajectory</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clc
+clear all
+close all
+%
+addpath InitFunction
+addpath ServiceFunction
+addpath Control
+addpath Command
+addpath PostProcess
+addpath StepFunction
+%% Initilize;
+
+ScenarioParameter = InitScenario;
+IMUParameters = InitIMU(ScenarioParameter);
+Quad = InitQuad;
+Control = InitControl;
+Command = InitCommand(ScenarioParameter.Rootfolder);
+[State,Command] = InitState(IMUParameters,Command,ScenarioParameter.ScenarioMode);
+[NavState,Command] = InitNavState(Command,State,ScenarioParameter);
+%todo
+Command.PoseSimulation = [State.X',State.psi,State.theta,NavState.theta,i]; 
+%
+EKF = InitEKF(NavState,IMUParameters,ScenarioParameter);
+DynamicStateParameter = InitDynamic(ScenarioParameter,State);
+SensorMeas = GetSensorMeas(DynamicStateParameter,IMUParameters);
+DynamicNavStateParameter = UpdateNavDynamic(SensorMeas,NavState);
+State = UpdateTrueIMUBias(SensorMeas,DynamicStateParameter,State);
+
+%% Step
+InitRecordParameter;%[RecordState,RecordNavState,RecordEKF,RecordCommand,RecordScenarioParameter]= InitRecordParameter(State,NavState,EKF,1);
+time = 0;
+t = 0;
+for i=1:1:(ScenarioParameter.FinalTime/ScenarioParameter.dt)
+    
+    %   Update State
+    State = UpdateState(ScenarioParameter,State,DynamicStateParameter.f_b,DynamicStateParameter.w_b);
+    NavState = UpdateNavState(ScenarioParameter,NavState,DynamicNavStateParameter.f_b,DynamicNavStateParameter.w_b,IMUParameters);
+     
+    %   EKF update
+    ScenarioParameter.isGPSAvailable = checkGPSAvailable(State);
+    if (ScenarioParameter.IdealIMU==0)
+        [NavState,EKF] = EKFStep(ScenarioParameter,NavState,State,DynamicNavStateParameter,EKF,i);
+    end
+    
+    if (ScenarioParameter.ScenarioMode>0)% not static
+        %   Implement Controller
+        Control = UpdateControl(Control,NavState,Command.X_des_GF,Command.psi_des,DynamicNavStateParameter,Quad,ScenarioParameter.g,ScenarioParameter.dt);
+        Control.init=1;
+    end
+    %   DynamicsAndKinematic
+    DynamicStateParameter = UpdateDynamic(ScenarioParameter,DynamicStateParameter,State,Control,Quad,time);
+    SensorMeas = GetSensorMeas(DynamicStateParameter,IMUParameters);
+    DynamicNavStateParameter = UpdateNavDynamic(SensorMeas,NavState);
+    State = UpdateTrueIMUBias(SensorMeas,DynamicStateParameter,State);
+    
+    if (Command.Finish_pose_command )
+        break;
+    end
+    if (ScenarioParameter.ScenarioMode>0)% not static
+        
+        [Command,Control]=UpdateCommandAndInitlizeControl(State,Command,Control,NavState,ScenarioParameter.ScenarioMode,i);
+    end
+%         checkPOI;%Command = checkPOI(State,Environment,Command);
+%         CheckCollision;%Environment= CheckCollision(Environment,State,time);
+    
+    %record
+    RecordParameter
+    time = time+ScenarioParameter.dt;
+    
+end
+time = t;
+%%
+
+thetaTrueSimulation = 0;
+thetaNavSimulation = 0;
+thetaCamera = 0;
+PoseUpdateTheta = zeros(1,5);
+for i=1:1:length(Command.PoseSimulation)
+    thetaTrueSimulation(i) = Command.PoseSimulation(i,5);
+    thetaNavSimulation(i) = Command.PoseSimulation(i,6);
+    thetaCamera(i) = Command.Pose_des_GF(i,5) -  thetaNavSimulation(i) + thetaTrueSimulation(i);
+    PoseUpdateTheta(i,:) = [Command.PoseSimulation(i,1:4),thetaCamera(i)];
+end
+%%
+
+
+%%
+% [visiblePointSimulation,visiblePointIndexCellSimulation] = CountPOIs(PoseUpdateTheta,Environment,CameraParameter);
+% length(unique(visiblePointSimulation))
+% [visiblePointIRIS,visiblePointIndexCellIRIS] = CountPOIs(Command.Pose_des_GF,Environment,CameraParameter);
+% length(unique(visiblePointIRIS))
+% length(unique(visiblePointSimulation))/length(unique(visiblePointIRIS))
+%%
+% SaveResults =0;
+% PlotEKFResult(RecordState,RecordNavState,RecordEKF,IMUParameters,t,SaveResults);
+% % plotDataNew(RecordState,RecordNavState,Command,RecordCommand,RecordScenarioParameter,IMUParameters,ScenarioParameter,t);
+plotDataNew
+% save([pwd,'\Results\RecordResult'])
+%%
+%% Post process
+
+% Environment = GetEnvironmentMission(ScenarioParameter.Rootfolder);
+% CameraParameter = InitCamera;
+% [POIInspectedCell,collisionCheck] = GetInspectedPOIandCollision(ScenarioParameter.Rootfolder);
+
+%%
+%  Plot_Trajectory
+##### SOURCE END #####
+--></body></html>

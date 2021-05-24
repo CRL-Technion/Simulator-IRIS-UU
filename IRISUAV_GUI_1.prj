@@ -1,0 +1,114 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="1826104837" file="C:\Users\david\OneDrive - Technion\Master\UAV_Simulation\IRISUAV_GUI_1.prj" location="C:\Users\david\OneDrive - Technion\Master\UAV_Simulation" name="IRISUAV_GUI_1" target="target.mlapps" target-name="Package App">
+    <param.appname>IRISUAV_GUI_1</param.appname>
+    <param.authnamewatermark>David Alpert</param.authnamewatermark>
+    <param.email />
+    <param.company />
+    <param.icon />
+    <param.icons />
+    <param.summary />
+    <param.description />
+    <param.screenshot>C:\Users\david\AppData\Local\Temp\tpa5a5e6cd_61c8_47d0_b08c_c1427fb3985a.png</param.screenshot>
+    <param.version>1.0</param.version>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms />
+    <param.output>${PROJECT_ROOT}</param.output>
+    <param.guid>039d5a55-9d94-4162-97c4-d48ea8a636b8</param.guid>
+    <unset>
+      <param.email />
+      <param.company />
+      <param.icon />
+      <param.icons />
+      <param.summary />
+      <param.description />
+      <param.version />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\IRISUAV_GUI.mlapp</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>${PROJECT_ROOT}\CalculateEKF_Gain.m</file>
+      <file>${PROJECT_ROOT}\CalculateF.m</file>
+      <file>${PROJECT_ROOT}\CalculateGammaQ.m</file>
+      <file>${PROJECT_ROOT}\CalculatePhi.m</file>
+      <file>${PROJECT_ROOT}\CheckIsWcovRegion.m</file>
+      <file>${PROJECT_ROOT}\Command\InitCommand.m</file>
+      <file>${PROJECT_ROOT}\Command\UpdateCommandAndInitlizeControl.m</file>
+      <file>${PROJECT_ROOT}\Control\PQR2U_234.m</file>
+      <file>${PROJECT_ROOT}\Control\quad_motor_speed.m</file>
+      <file>${PROJECT_ROOT}\Control\UpdateControl.m</file>
+      <file>${PROJECT_ROOT}\Control\XYCommand2PhiTheta.m</file>
+      <file>${PROJECT_ROOT}\Control\ZandEuler2PQRU1.m</file>
+      <file>${PROJECT_ROOT}\CreateTableResults.m</file>
+      <file>${PROJECT_ROOT}\GetDeltaZ.m</file>
+      <file>${PROJECT_ROOT}\GetNumberOfCollisionSimulation.m</file>
+      <file>${PROJECT_ROOT}\GetPathLength.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitControl.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitDynamic.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitEKF.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitIMU.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitNavState.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitQuad.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitRecordParameter.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitScenario.m</file>
+      <file>${PROJECT_ROOT}\InitFunction\InitState.m</file>
+      <file>${PROJECT_ROOT}\mainUAVsimulation.m</file>
+      <file>${PROJECT_ROOT}\NumberOfPOIFromVertexFile.m</file>
+      <file>${PROJECT_ROOT}\POI_belong_region.m</file>
+      <file>${PROJECT_ROOT}\PostProcessResultFromFolder.m</file>
+      <file>${PROJECT_ROOT}\ServiceFunction\dcm2euler.m</file>
+      <file>${PROJECT_ROOT}\ServiceFunction\Euler2Dcm.m</file>
+      <file>${PROJECT_ROOT}\ServiceFunction\skew.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\checkGPSAvailable.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\EKFStep.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\GetSensorMeas.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\RecordParameter.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\UpdateDynamic.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\UpdateNavDynamic.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\UpdateNavState.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\UpdateState.m</file>
+      <file>${PROJECT_ROOT}\StepFunction\UpdateTrueIMUBias.m</file>
+      <file>${PROJECT_ROOT}\UpdateNavStateFromEKF.m</file>
+      <file>${PROJECT_ROOT}\WriteLocationErrorParameterFile.m</file>
+    </fileset.depfun>
+    <fileset.resources />
+    <fileset.package />
+    <build-deliverables>
+      <file location="C:\Users\david\OneDrive - Technion\Master" name="UAV_Simulation" optional="false">C:\Users\david\OneDrive - Technion\Master\UAV_Simulation</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2020b</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
