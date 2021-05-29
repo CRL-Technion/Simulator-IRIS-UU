@@ -2,7 +2,7 @@ close all
 clear all
 
 % folderDir = 'C:\Users\david\OneDrive\DocumentsProjects\Thesis\‏‏‏‏result_061120';
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRISUav\build\Results\‏‏Stop_Minus11_Intermediate_190521 - עותק';
+folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRISUav\build\Results\yMinus11_Stop_280521';
 % if ~exist('folderDir','var')
 %     folderDir = 'C:\Users\david\OneDrive - Technion\Master\UAV_Simulation\Results\test_22012021';
 % end
