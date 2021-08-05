@@ -2,7 +2,8 @@ close all
 clear all
 
 % folderDir = 'C:\Users\david\OneDrive\DocumentsProjects\Thesis\‏‏‏‏result_061120';
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRISUav\build\Results\yMinus11_Stop_280521';
+folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRISUav\build\Results\testProb_monteCralo_5';
+isCost = 1;
 % if ~exist('folderDir','var')
 %     folderDir = 'C:\Users\david\OneDrive - Technion\Master\UAV_Simulation\Results\test_22012021';
 % end
@@ -24,7 +25,7 @@ tempIndex =1;
 %         end
 % while (indexRuns<=numberOfRuns && tempIndex<numberOfRuns*length(subFoldersNames))
 % while (indexRuns<=numberOfRuns )
-minRunSolution = 4;
+minRunSolution = 1;
     tempIndex = tempIndex+1;
     for i=3:1:length(subFoldersNames)   
         if (strcmp(subFoldersNames(i).name,['Run',num2str(0)]))
@@ -264,13 +265,16 @@ print(f8, figure_path8, '-dpdf');
 f9 = figure(9)
 figure_name = 'figure9';
 figure_path9 = fullfile(folderDir,figure_name);
-% maxTimeAllowInRiskZone=zeros(length(runNumber{1}.OutputUAVsimulation.minTimeAllowInRiskZone),length(runNumber));
-% for i=1:1:length(runNumber)
-%     maxTimeAllowInRiskZone(:,i) = runNumber{i}.OutputUAVsimulation.minTimeAllowInRiskZone;
-% end
-maxTimeAllowInRiskZone=zeros(length(runNumber{1}.OutputUAVsimulation.maxTimeAllowInRiskZone),length(runNumber));
-for i=1:1:length(runNumber)
-    maxTimeAllowInRiskZone(:,i) = runNumber{i}.OutputUAVsimulation.maxTimeAllowInRiskZone;
+if (isCost)
+    maxTimeAllowInRiskZone=zeros(length(runNumber{1}.OutputUAVsimulation.minTimeAllowInRiskZone),length(runNumber));
+    for i=1:1:length(runNumber)
+        maxTimeAllowInRiskZone(:,i) = runNumber{i}.OutputUAVsimulation.minTimeAllowInRiskZone;
+    end
+else
+    maxTimeAllowInRiskZone=zeros(length(runNumber{1}.OutputUAVsimulation.maxTimeAllowInRiskZone),length(runNumber));
+    for i=1:1:length(runNumber)
+        maxTimeAllowInRiskZone(:,i) = runNumber{i}.OutputUAVsimulation.maxTimeAllowInRiskZone;
+    end
 end
 meanMaxTimeAllowInRiskZone = mean(maxTimeAllowInRiskZone);
 meanTotal_length_planned = mean(Total_length_planned);

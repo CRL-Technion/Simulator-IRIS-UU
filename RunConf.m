@@ -23,8 +23,13 @@ for i=1:1:length(a)
             jumpValue = str2double(b{2});
             finalValue = str2double(b{3});
             temp = [initValue:jumpValue:finalValue];
+            if(indexValue>0)
+                values = [values,temp];
+            else
+                values = [temp];
+            end
             indexValue = indexValue+length(temp);
-            values = [values,temp];
+            
             break;
         else
             indexValue=indexValue+1;
@@ -32,11 +37,8 @@ for i=1:1:length(a)
         end
     end
 end
-results =values;
-
-
+results =values
 end
-
 % Value changed function: search_graphButton
 function search_graphButtonValueChanged(app, event)
 value = app.search_graphButton.Value;
@@ -59,7 +61,8 @@ if ~exist([IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditF
         app.AvaragevelocitymsEditField.Value,...
         app.MintimeinRZsEditField.Value,...
         app.MaxtimeinRZsEditField.Value,...
-        app.MultipleFactorEditField.Value];
+        app.MultipleFactorEditField.Value,...
+        app.MonteCarloSearchEditField.Value];
     %10,10,1,MintimeallowedinGNSSOutageregionEnvelope(i),40,];
     
     WriteLocationErrorParameterFile([IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(app.counter),'/',LocationErrorParameterFileName],LocationErrorParameter);%
@@ -175,158 +178,161 @@ end
 function RunEnvelopeButtonPushed(app, event)
 MintimeallowedinGNSSOutageregionEnvelope = readEnvelopeInput(app,app.MintimeallowedinGNSSOutageregionEditField.Value);
 MaxtimeallowedinGNSSOutageregionEnvelope = readEnvelopeInput(app,app.MaxtimeallowedinGNSSOutageregionEditField.Value);
-
+MonteCarloSearchEnvelope = readEnvelopeInput(app,app.MonteCarloSearchEnvelopeEditField.Value);
 IRIS_build_folder=app.IRISpathEditField.Value;
 LocationErrorParameterFileName = 'LocationErrorParameterFile';
 %Run build_graph
 is_Graph_build = 0;
-%             app.counter =1;
+app.counter =0;
 
-for i=1:1:length(MintimeallowedinGNSSOutageregionEnvelope)
-    for i_max=1:1:length(MaxtimeallowedinGNSSOutageregionEnvelope)
-        app.counter = length(MaxtimeallowedinGNSSOutageregionEnvelope)*(i-1)+i_max;
-        IRIS_build_folder=app.IRISpathEditField.Value;
-        CommandToPowershell = ['powershell cd ',IRIS_build_folder,'; wsl '];
-        mkdircommand = ['mkdir -p  ','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(app.counter)];
-        system([CommandToPowershell,mkdircommand])
-      
-        
-		app.seedEditField.Value = num2str(i);
-        
-        CurrentOutputFolder = ['\runNumber',num2str(i)];
-        ResultFolder = [pwd,'\Results\'];
-        OutputFolder = [ResultFolder,app.OutputTableresultfoldernameEditField.Value];
-        pathBuildGraphFolder = [IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(0)];
-        %                     if ~exist([OutputFolder,CurrentOutputFolder], 'dir')
-        %                         mkdir([OutputFolder,CurrentOutputFolder])
-        %                     end
-        app.CurrentFoler = CurrentOutputFolder;
-        if (~is_Graph_build)
+for MC_search_id =1:1:length(MonteCarloSearchEnvelope)
+    for i=1:1:length(MintimeallowedinGNSSOutageregionEnvelope)
+        for i_max=1:1:length(MaxtimeallowedinGNSSOutageregionEnvelope)
+            %                         app.counter = length(MaxtimeallowedinGNSSOutageregionEnvelope)*(i-1)+i_max;
+            app.counter = app.counter+1;
+            IRIS_build_folder=app.IRISpathEditField.Value;
+            CommandToPowershell = ['powershell cd ',IRIS_build_folder,'; wsl '];
+            mkdircommand = ['mkdir -p  ','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(app.counter)];
+            system([CommandToPowershell,mkdircommand])
+            %Location Error Parameter
+            LocationErrorParameter = [...
+                app.AccbiasmgEditField.Value,...
+                app.GyrobiasdeghrEditField.Value,...
+                app.AvaragevelocitymsEditField.Value,...
+                MintimeallowedinGNSSOutageregionEnvelope(i),...%app.MintimeinRZsEditField.Value,...
+                MaxtimeallowedinGNSSOutageregionEnvelope(i_max),...%app.MaxtimeinRZsEditField.Value,...
+                app.MultipleFactorEditField.Value,...
+                MonteCarloSearchEnvelope(MC_search_id)];
+            %10,10,1,MintimeallowedinGNSSOutageregionEnvelope(i),40,];
             
+            WriteLocationErrorParameterFile([IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(app.counter),'/',LocationErrorParameterFileName],LocationErrorParameter);%
+            app.seedEditField.Value = num2str(i);
+            
+            CurrentOutputFolder = ['\runNumber',num2str(i)];
+            ResultFolder = [pwd,'\Results\'];
+            OutputFolder = [ResultFolder,app.OutputTableresultfoldernameEditField.Value];
             pathBuildGraphFolder = [IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(0)];
-            %                         if ~isfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_conf']) %build was not performed in another thread
-            
-            if (~isfile([pathBuildGraphFolder,'/CheckBuildStarted']))
-                if ~exist(pathBuildGraphFolder, 'dir')
-                    mkdir(pathBuildGraphFolder);
-                end
-                fileID = fopen([pathBuildGraphFolder,'/CheckBuildStarted'],'w');
-                fclose(fileID);
-                app.counter = 0;
-                build_graphButtonValueChanged(app, event);
-                app.counter = length(MaxtimeallowedinGNSSOutageregionEnvelope)*(i-1)+i_max;
+            %                     if ~exist([OutputFolder,CurrentOutputFolder], 'dir')
+            %                         mkdir([OutputFolder,CurrentOutputFolder])
+            %                     end
+            app.CurrentFoler = CurrentOutputFolder;
+            if (~is_Graph_build)
                 
-                fileID = fopen([pathBuildGraphFolder,'/CheckBuildEnded'],'w');
-                fclose(fileID);
-            else
-                while (~isfile([pathBuildGraphFolder,'/CheckBuildEnded'])) % search was not ended in the first thread
-                    pause(3);
+                pathBuildGraphFolder = [IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(0)];
+                %                         if ~isfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_conf']) %build was not performed in another thread
+                
+                if (~isfile([pathBuildGraphFolder,'/CheckBuildStarted']))
+                    if ~exist(pathBuildGraphFolder, 'dir')
+                        mkdir(pathBuildGraphFolder);
+                    end
+                    fileID = fopen([pathBuildGraphFolder,'/CheckBuildStarted'],'w');
+                    fclose(fileID);
+                    app.counter = 0;
+                    build_graphButtonValueChanged(app, event);
+                    %                                 app.counter = length(MaxtimeallowedinGNSSOutageregionEnvelope)*(i-1)+i_max;
+                    app.counter =1;
+                    fileID = fopen([pathBuildGraphFolder,'/CheckBuildEnded'],'w');
+                    fclose(fileID);
+                else
+                    while (~isfile([pathBuildGraphFolder,'/CheckBuildEnded'])) % search was not ended in the first thread
+                        pause(3);
+                    end
                 end
+                
+                %                         build_graphButtonValueChanged(app, event);
+                is_Graph_build = 1;
             end
-            
-            %                         build_graphButtonValueChanged(app, event);
-            is_Graph_build = 1;
-        end
-        %                  if (counter>2)
-        %                             break;
-        %                         end
-        for j=1:1:(app.IRISMonteCarlonumberEditField.Value)
-            %build_graph
-            %                     build_graphButtonValueChanged(app, event);
-            %search_graph
-            pathBuildGraphFolder = [IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(0)];
-            pathCurrentFolder = [IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(app.counter)];
-            tryNotSuceess = 1;
-            while(tryNotSuceess)
-                try
-                    copyfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_conf'],[pathCurrentFolder,'/']);
-                    copyfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_edge'],[pathCurrentFolder,'/']);
-                    copyfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_vertex'],[pathCurrentFolder,'/']);
-                    tryNotSuceess = 0;
-                catch
-                    pause(1);
-                end
-            end
-            %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value,'_result'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            if ~isfile([pathCurrentFolder,'/CheckSearchStarted']) %search was not performed in another thread
-                if ~exist(pathCurrentFolder, 'dir')
-                    mkdir(pathCurrentFolder);
-                end
-                fileID = fopen([pathCurrentFolder,'/CheckSearchStarted'],'w');
-                fclose(fileID);
-				  %Location Error Parameter
-        LocationErrorParameter = [...
-            app.AccbiasmgEditField.Value,...
-            app.GyrobiasdeghrEditField.Value,...
-            app.AvaragevelocitymsEditField.Value,...
-            MintimeallowedinGNSSOutageregionEnvelope(i),...%app.MintimeinRZsEditField.Value,...
-            MaxtimeallowedinGNSSOutageregionEnvelope(i_max),...%app.MaxtimeinRZsEditField.Value,...
-            app.MultipleFactorEditField.Value];
-        %10,10,1,MintimeallowedinGNSSOutageregionEnvelope(i),40,];
-        
-        WriteLocationErrorParameterFile([IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(app.counter),'/',LocationErrorParameterFileName],LocationErrorParameter);%
-		pause(2)
-                search_graphButtonValueChanged(app, event);
-                pause(3);
-                temp = importdata([pathCurrentFolder,'/testIRIS']);
-                nosolution = (temp(end,5) < temp(end,2)*temp(end,3)); %noSolution
-                if (nosolution)
-                    continue;
-                end
-                fileID = fopen([pathCurrentFolder,'/CheckSearchEnded'],'w');
-                fclose(fileID);
-            else
-                continue;
-                %                             while (~isfile([pathCurrentFolder,'/CheckSearchEnded'])) % search was not ended in the first thread
-                %                                 pause(3);
-                %                             end
-            end
-            
-            
-            %                         if (j==1)
-            %                             mkdir([OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %                             copyfile([IRIS_build_folder,'\',LocationErrorParameterFileName],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value,'_result'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %                             copyfile([IRIS_build_folder,'\',app.filetowriteEditField.Value,'_conf'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %                             copyfile([IRIS_build_folder,'\',app.filetowriteEditField.Value,'_edge'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %                             copyfile([IRIS_build_folder,'\',app.filetowriteEditField.Value,'_vertex'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
-            %
+            %                  if (counter>2)
+            %                             break;
             %                         end
-            for k=1:1:(app.SimulationMonteCarlonumberEditField.Value)
-                %uav simualtion
+            for j=1:1:(app.IRISMonteCarlonumberEditField.Value)
+                %build_graph
+                %                     build_graphButtonValueChanged(app, event);
+                %search_graph
+                pathBuildGraphFolder = [IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(0)];
+                pathCurrentFolder = [IRIS_build_folder,'/','Results/',app.OutputTableresultfoldernameEditField.Value,'/Run',num2str(app.counter)];
+                tryNotSuceess = 1;
+                while(tryNotSuceess)
+                    try
+                        copyfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_conf'],[pathCurrentFolder,'/']);
+                        copyfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_edge'],[pathCurrentFolder,'/']);
+                        copyfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_vertex'],[pathCurrentFolder,'/']);
+                        %                                 copyfile([pathBuildGraphFolder,'/',app.filetowriteEditField.Value,'_poiVertex'],[pathCurrentFolder,'/']);
+                        
+                        tryNotSuceess = 0;
+                    catch
+                        pause(1);
+                    end
+                end
+                %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value,'_result'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                if ~isfile([pathCurrentFolder,'/CheckSearchStarted']) %search was not performed in another thread
+                    if ~exist(pathCurrentFolder, 'dir')
+                        mkdir(pathCurrentFolder);
+                    end
+                    fileID = fopen([pathCurrentFolder,'/CheckSearchStarted'],'w');
+                    fclose(fileID);
+                    search_graphButtonValueChanged(app, event);
+                    
+                    temp = importdata([pathCurrentFolder,'/testIRIS']);
+                    nosolution = (temp(end,5) < temp(end,2)*temp(end,3)); %noSolution
+                    %                             if (nosolution)
+                    %                                 continue;
+                    %                             end
+                    fileID = fopen([pathCurrentFolder,'/CheckSearchEnded'],'w');
+                    fclose(fileID);
+                else
+                    continue;
+                    %                             while (~isfile([pathCurrentFolder,'/CheckSearchEnded'])) % search was not ended in the first thread
+                    %                                 pause(3);
+                    %                             end
+                end
                 
-                file_to_write = app.InputIRISfilenameEditField.Value;
+                
+                %                         if (j==1)
+                %                             mkdir([OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                %                             copyfile([IRIS_build_folder,'\',LocationErrorParameterFileName],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                %                             copyfile([IRIS_build_folder,'\',app.file_to_writeEditField.Value,'_result'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                %                             copyfile([IRIS_build_folder,'\',app.filetowriteEditField.Value,'_conf'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                %                             copyfile([IRIS_build_folder,'\',app.filetowriteEditField.Value,'_edge'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
+                %                             copyfile([IRIS_build_folder,'\',app.filetowriteEditField.Value,'_vertex'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\'])
                 %
-                UAV_SimulationButtonValueChanged(app, event);
-                %checkPOIandCollision
-                CheckPOIandCollisionButtonValueChanged(app, event);
-                %Create table results
-                app.CurrentFoler = CurrentOutputFolder;
-                
-                CreateTableResultButtonPushed(app, event);
-                %                             app.counter=app.counter+1;
-                %                            Command = InitCommand(file_to_write,IRIS_build_folder);
-                %                         POI_belong_region;
-                %                         totalOptimalPOIIRIS = length(unique([WCovRegion_POI_SearchSpace,WOutagesRegion_POI_SearchSpace]));
-                %                         totalOptimalPOISimulation = length(unique([WOutagesRegion_POI_palnned,WCovRegion_POI_palnned]));
-                %                         if (totalOptimalPOISimulation<totalOptimalPOIIRIS)
-                %                             break;
                 %                         end
-                %                             //if (k==1)
-                %                                 SimulationOutputFileName = app.OutputUAV_SimulationfilenameEditField.Value;
-                %                                 IRISOutputFileName = app.filetowriteEditField.Value;
-                %                                 copyfile([IRIS_build_folder,'\',SimulationOutputFileName,'_',IRISOutputFileName],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
-                %                                 copyfile([IRIS_build_folder,'\',SimulationOutputFileName,'_',IRISOutputFileName,'_edge'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
-                %                                 copyfile([IRIS_build_folder,'\',SimulationOutputFileName,'_',IRISOutputFileName,'_vertex'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
-                %                                 copyfile([pwd,'\','UAVSimulationResults.mat'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
-                
-                
-                %                             //end
+                for k=1:1:(app.SimulationMonteCarlonumberEditField.Value)
+                    %uav simualtion
+                    
+                    file_to_write = app.InputIRISfilenameEditField.Value;
+                    %
+                    UAV_SimulationButtonValueChanged(app, event);
+                    %checkPOIandCollision
+                    CheckPOIandCollisionButtonValueChanged(app, event);
+                    %Create table results
+                    app.CurrentFoler = CurrentOutputFolder;
+                    
+                    CreateTableResultButtonPushed(app, event);
+                    %                             app.counter=app.counter+1;
+                    %                            Command = InitCommand(file_to_write,IRIS_build_folder);
+                    %                         POI_belong_region;
+                    %                         totalOptimalPOIIRIS = length(unique([WCovRegion_POI_SearchSpace,WOutagesRegion_POI_SearchSpace]));
+                    %                         totalOptimalPOISimulation = length(unique([WOutagesRegion_POI_palnned,WCovRegion_POI_palnned]));
+                    %                         if (totalOptimalPOISimulation<totalOptimalPOIIRIS)
+                    %                             break;
+                    %                         end
+                    %                             //if (k==1)
+                    %                                 SimulationOutputFileName = app.OutputUAV_SimulationfilenameEditField.Value;
+                    %                                 IRISOutputFileName = app.filetowriteEditField.Value;
+                    %                                 copyfile([IRIS_build_folder,'\',SimulationOutputFileName,'_',IRISOutputFileName],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
+                    %                                 copyfile([IRIS_build_folder,'\',SimulationOutputFileName,'_',IRISOutputFileName,'_edge'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
+                    %                                 copyfile([IRIS_build_folder,'\',SimulationOutputFileName,'_',IRISOutputFileName,'_vertex'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
+                    %                                 copyfile([pwd,'\','UAVSimulationResults.mat'],[OutputFolder,CurrentOutputFolder,'\IRISOutput\']);
+                    
+                    
+                    %                             //end
+                end
             end
+            
         end
-        
     end
 end
 end

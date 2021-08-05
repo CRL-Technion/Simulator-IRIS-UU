@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Submit this script with: qsub
+
+#PBS -N cmake
+
+#PBS -q zeus_short_q
+
+#PBS -l select=1:ncpus=1:mpiprocs=1
+
+#PBS -l select=mem=1GB
+
+#PBS -l walltime=1:0:00
+
+#PBS -m abe
+
+#PBS -M  davidalpert11@gmail.com
+
+PBS_O_WORKDIR=$HOME//home/sdavidal/Projects/MATLAB-IRIS-UAV
+
+cd $PBS_O_WORKDIR
