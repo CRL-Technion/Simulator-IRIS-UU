@@ -27,8 +27,12 @@ end
 if (ScenarioParameter.isGPSAvailable)
     if(mod(i,ScenarioParameter.GPS_freq) == 0)
         
+        %     if (ScenarioParameter.isGPSAvailable)
         delta_Z = GetDeltaZ(EKF.H,NavState,State);
-        
+        %     else
+        %             delta_Z = GetDeltaZ_2(EKF.H,NavState,State);
+        %
+        %     end
         %Calculate Kalman Filter gain
         K = CalculateEKF_Gain(EKF);
         

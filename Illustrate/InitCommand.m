@@ -39,6 +39,7 @@ Command.X_des_GF = Command.Pose_des_GF(1,1:3)';         % desired value of X in 
 Command.psi_des = Command.Pose_des_GF(1,4);
 else
 Command.Pose_des_GF = position_vertex(vertexTrajectoryTempForIndex,1:5);%x,y,z,psi
+
 Command.X_des_GF = Command.Pose_des_GF(Command.index_Pose_des_GF+1,1:3)';         % desired value of X in Global frame
 Command.psi_des = Command.Pose_des_GF(Command.index_Pose_des_GF+1,4);
 end
@@ -80,7 +81,7 @@ Command.POIChecked = zeros(size(Command.POIUnique))';
 Command.POICell = POICell;
 Command.vertexTrajectoryTempForIndex = vertexTrajectoryTempForIndex;
 
-Command.Tolerance_pose_des = [0.5,1*pi/180];
+Command.Tolerance_pose_des = [1,1*pi/180];
 Command.Finish_pose_command = 0;
 
 %%

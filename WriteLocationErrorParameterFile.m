@@ -8,9 +8,10 @@ minTimeAllowInRistZone = parameters(4);
 maxnTimeAllowInRistZone = parameters(5);
 MultipleFactor = parameters(6);
 MonteCarloSearch = parameters(7);
+collisionProbThreshold = parameters(8);
 
 
-fprintf(fileID,'%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f\n',b_a_milli_g,b_g_degPerHr,avarageVelocity,minTimeAllowInRistZone,maxnTimeAllowInRistZone,MultipleFactor,MonteCarloSearch);
+ fprintf(fileID,'%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f\n',b_a_milli_g,b_g_degPerHr,avarageVelocity,minTimeAllowInRistZone,maxnTimeAllowInRistZone,MultipleFactor,MonteCarloSearch,collisionProbThreshold);
 fclose(fileID);
 
 end

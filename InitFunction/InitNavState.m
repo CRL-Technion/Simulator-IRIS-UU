@@ -2,6 +2,12 @@ function [NavState,Command] = InitNavState(Command,State,ScenarioParameter)
 %UNTITLED8 Summary of this function goes here
 %   Detailed explanation goes here
 
+ NavState =State;
+NavState.SigmaPosInit = 1;%[m]
+NavState.SigmaVelInit = 0.1;%[m/s]
+NavState.SigmaEulerInit = 0.01;%[deg]
+    return;
+
 if (ScenarioParameter.IdealIMU)
     NavState =State;
     NavState.SigmaPosInit = 0;%[m]

@@ -1,0 +1,454 @@
+includeRef=0;
+labelesBoxPlotOriginal = labelesBoxPlot;
+labelesBoxPlot{1} = 'IRIS';
+labelesBoxPlot{2} = 'MLU';
+for i=3:1:length(labelesBoxPlot)
+    labelesBoxPlot{i} = ['IRIS-U^2-',labelesBoxPlot{i}];
+end
+% close all
+CL = 0.95;
+alpha = (1-CL);
+
+colorIris = [0.7 0 0];
+colorLum = [0.7 0.4 0.1];
+colorIris_u = [0.1 0 0.4];
+colorBoundMean = [0.1 0 0.9];
+colorBoundAll = [0.1 0.2 0.6];
+% 
+% colorIris_u = [0 0.3 0.3];
+% colorBoundMean = [0,0.4,0.2];
+% colorBoundAll = [0,0.7,0.3];
+
+%%
+% f5 = figure(98)
+%subplot(2,2,1)
+f = figure(1);
+f.Position = [100 100 700 200];
+% set(gca, 'YScale', 'log')
+% yticks([40:20:100])
+figure_name = 'CI';
+figure_path5 = fullfile(folderDir,figure_name);
+hold on; box on; grid on;
+percentageOfPOI = zeros(length(runNumber{i}.POIsimulation),1);
+bound_percetagePOI = zeros(1,2);
+mc=1;
+meanPoi = 1;
+for i=1:1:length(runNumber)
+    mc(i) = runNumber{i}.MC_number;
+    bound_percetagePOI_individual = zeros(1,2);
+    percentageOfPOI(:,i) = 100*(runNumber{i}.POIsimulation)/(runNumber{i}.req_POI_coverage);
+    meanPoi(i) = mean(percentageOfPOI(:,i)) ;
+    counterNotRelevantPOI = 0;
+    counterRelevantPOI = 0;
+    if(runNumber{i}.MC_number>1)
+        for j=1:1:length(runNumber{i}.IPV)
+            if (runNumber{i}.IPV(j)<0.001)
+                counterNotRelevantPOI = counterNotRelevantPOI+1;
+                continue
+            end
+            counterRelevantPOI = counterRelevantPOI+1;
+            x =ones(runNumber{i}.MC_number,1)*runNumber{i}.IPV(j);
+            [phat,pci] = binofit(sum(x),length(x),alpha);
+            temp(1,2) = pci(1);
+            temp(2,2) = pci(2);
+            if (j>1)
+                bound_percetagePOI_individual(1,1) = bound_percetagePOI_individual(1,1) + temp(1,2);
+                bound_percetagePOI_individual(1,2) = bound_percetagePOI_individual(1,2) + temp(2,2);
+            else
+                bound_percetagePOI_individual(1,1) =  temp(1,2);
+                bound_percetagePOI_individual(1,2) =  temp(2,2);
+            end
+        end
+        if (counterRelevantPOI<runNumber{i}.req_POI_coverage)
+            [phat,pci] = binofit(0,runNumber{i}.MC_number,alpha);
+            temp(1,2) = pci(1)*(runNumber{i}.req_POI_coverage-counterRelevantPOI);
+            temp(2,2) = pci(2)*(runNumber{i}.req_POI_coverage-counterRelevantPOI);
+            bound_percetagePOI_individual(1,1) = bound_percetagePOI_individual(1,1) + temp(1,2);
+            bound_percetagePOI_individual(1,2) = bound_percetagePOI_individual(1,2) + temp(2,2);
+        end
+        bound_percetagePOI(i,:) =100*bound_percetagePOI_individual(1,:)/sum(runNumber{i}.req_POI_coverage);
+    end
+end
+
+start_indices =1;%start_indices = find(mc == mc(1));
+
+if (length(start_indices)<2)
+    diff_startIndex = length(mc);
+else
+    diff_startIndex = (min(diff(start_indices)))
+    diff_startIndex = diff_startIndex;
+end
+mc1 = reshape(mc, [diff_startIndex length(start_indices)])';
+meanPoi1 = reshape(meanPoi, [diff_startIndex length(start_indices)])';
+lowerBoundPOI1 = bound_percetagePOI(:,1);
+lowerBoundPOI1 = reshape(lowerBoundPOI1, [diff_startIndex length(start_indices)])';
+
+%mc2 = mc(start_indices(1):start_indices(2)-1);
+meanPoi2 = mean(meanPoi1);
+lowerBoundPOI2 = mean(lowerBoundPOI1);
+
+for i=1:1:length(start_indices)
+    h0_POI_IRIS= plot([mc1(i,3),mc1(i,end)],[(meanPoi1(i,1)),(meanPoi1(i,1))],'r-','color',colorIris,'linewidth',2);
+    h0_POI_LUM= plot([mc1(i,3),mc1(i,end)],[(meanPoi1(i,2)),(meanPoi1(i,2))],'y-','color',colorLum,'linewidth',2);
+    h1_POI= plot(mc1(i,3:end),(meanPoi1(i,3:end)),'-*','color',colorIris_u,'linewidth',2);
+h2_POI =plot(mc1(i,3:end),(lowerBoundPOI1(i,3:end)),'--','color',colorBoundMean,'linewidth',2);
+end
+% h1= plot(mc,smooth(meanPoi),'b','linewidth',2);
+% h2 =plot(mc(3:end),smooth(lowerBoundPOI),'r--','linewidth',2);
+% ax = gca;
+% ax.XAxis.TickLabels{1} = 'IRIS';
+% legend([h0_POI_IRIS,h0_POI_LUM,h1_POI,h2_POI],'Avarage-IRIS','Avarage-LUM','Avarage-IRIS-U^2','Lower bound','location','best')
+
+xlabel('$m$','fontsize',12,'fontsize',12,'Interpreter','latex')
+ylabel('Percentage of POI [%]','fontsize',12)
+% legend(h1,'CI for mean','location','best')
+% savefig(f5, figure_path5, 'compact');  %   Compressed fig. Can only be opened in MATLAB 2014b or above.
+% print(f5, figure_path5, '-dpdf');
+ax = gca;
+ax.FontSize = 12; 
+xlim([min(mc1(1,3:end)) max(mc1)])
+%%
+f = figure(2);
+f.Position = [100 100 700 200];
+hold on; box on; grid on;
+% set(gca, 'YScale', 'log')
+% yticks([0.1,0.5 1 5 10,20,50])
+% title('Collision probability')
+% boxplot([dataOutputRef.percentageLocationError,dataOutputTest_0.percentageLocationError,dataOutputTest_5.percentageLocationError,dataOutputTest_10.percentageLocationError,dataOutputTest_15.percentageLocationError,dataOutputTest_20.percentageLocationError]...
+%     ,'Labels',labeles)
+% Number_of_collision = 0;%=zeros(length(runNumber{1}.OutputUAVsimulationMain.Number_of_collision),length(runNumber));
+bound_collision = zeros(length(runNumber{1}),2);
+bound_collision_simulation = zeros(length(runNumber{1}),2);
+
+
+collisionProbability1 = 1;
+subNumberOfcollision = 1;
+meanCollision = 1;
+
+mc=1;
+missBound = 0;
+for i=1:1:length(runNumber)
+   
+    mc(i) = runNumber{i}.MC_number;
+    
+    collisionProbabilityAllEdges = mean(runNumber{i}.collisionVectorsimulation(:,3:end));
+    meanCollision(i) = 1;
+    for j=1:1:length(collisionProbabilityAllEdges)
+        meanCollision(i) = meanCollision(i)*(1-collisionProbabilityAllEdges(j));
+    end
+    meanCollision(i) = 1-meanCollision(i);
+    
+    Number_of_collision(:,i) = runNumber{i}.NumberOfcollision;
+    tempArray = 1:1:length(Number_of_collision(:,i));
+    indexTemp = Number_of_collision(:,i)>0.5;
+    Number_of_collision(tempArray(Number_of_collision(:,i)>0.5),i) = 1;
+%     
+    meanCollision(i) = mean(Number_of_collision(:,i));
+    Number_of_collision(:,i) = runNumber{i}.NumberOfcollision;
+    tempArray = 1:1:length(Number_of_collision(:,i));
+    indexTemp = Number_of_collision(:,i)>0.5;
+    Number_of_collision(tempArray(Number_of_collision(:,i)>0.5),i) = 1;
+    index = 0;
+    k=1;
+    L_jump=500;
+    
+%     while(k<length(Number_of_collision))
+%         index = index+1;
+%         subNumberOfcollision(i,index)= mean(Number_of_collision(k:k+(L_jump-1),i));
+%         k=k+L_jump;
+%     end
+    if(runNumber{i}.MC_number>1)
+        
+        x =zeros(runNumber{i}.MC_number,1);
+        [phat,pci] = binofit(sum(x),length(x),alpha);
+%         (length(runNumber{i}.lengthVectorIRIS(:,1))-1)
+        temp(1,2) = pci(1);
+        temp(2,2) = pci(2);
+%         z = 2.58;1.96;
+%         m = mc(i);
+%         p=0;
+        %wilson score
+%         temp(1,2) = max([0,(2*m*p+z^2-(z*sqrt(z^2-1/m+4*m*p*(1-p)+(4*p-2))+1))/(2*(m+z^2))]);
+%         temp(2,2) = min([1,(2*m*p+z^2+(z*sqrt(z^2-1/m+4*m*p*(1-p)+(4*p-2))+1))/(2*(m+z^2))]);
+        
+ 
+%             temp(1,2) = 1 - (1-temp(1,2))^(length(runNumber{i}.lengthVectorIRIS(:,1))-1);
+%             temp(2,2) = 1 - (1-temp(2,2))^(length(runNumber{i}.lengthVectorIRIS(:,1))-1);
+%         
+        bound_collision(i,1) = temp(1,2);
+        bound_collision(i,2) = temp(2,2);
+        
+    end
+    
+    
+end
+
+
+start_indices =1;%start_indices = find(mc == mc(1));
+mc1 = reshape(mc, [diff_startIndex length(start_indices)])';
+meanCollision1 = reshape(meanCollision, [diff_startIndex length(start_indices)])';
+UpperBoundCollision1 = bound_collision(:,2);
+UpperBoundCollision1 = reshape(UpperBoundCollision1, [diff_startIndex length(start_indices)])';
+
+%mc2 = mc(start_indices(1):start_indices(2)-1);
+meanCollision2 = mean(meanCollision1);
+UpperBoundCollision2 = mean(UpperBoundCollision1);
+
+
+
+for i=1:1:length(start_indices)
+    
+%     h1= plot(mc1(i,:),(meanCollision1(i,:)),'b*','linewidth',2);
+% h2 =plot(mc1(i,3:end),(UpperBoundCollision1(i,3:end)),'r--','linewidth',2);
+
+%     h0_coll= plot(mc1(i,1),(meanCollision1(i,1)),'-*','color',colorIris,'linewidth',2);
+%     h1_coll= plot(mc1(i,3:end),(meanCollision1(i,3:end)),'-*','color',colorIris_u,'linewidth',2);
+% h2_coll =plot(mc1(i,3:end),(UpperBoundCollision1(i,3:end)),'--','color',colorBoundMean,'linewidth',2);
+
+  h0_coll_IRIS= plot([mc1(i,3),mc1(i,end)],[(meanCollision1(i,1)),(meanCollision1(i,1))],'r-','color',colorIris,'linewidth',2);
+    h0_coll_LUM= plot([mc1(i,3),mc1(i,end)],[(meanCollision1(i,2)),(meanCollision1(i,2))],'y-','color',colorLum,'linewidth',2);
+    h1_coll= plot(mc1(i,3:end),(meanCollision1(i,3:end)),'-*','color',colorIris_u,'linewidth',2);
+h2_coll =plot(mc1(i,3:end),(UpperBoundCollision1(i,3:end)),'--','color',colorBoundMean,'linewidth',2);
+end
+% for i=1:1:length(mc1(1,:))
+%      missBound(i) = sum(meanCollision1(:,i)>UpperBoundCollision1(1,i))/length(start_indices);
+% end
+% for j=1:1:length(mc1(1,:))
+%    h3= plot(mc1(1,j)*ones(length(subNumberOfcollision(j,:)),1),subNumberOfcollision(j,:),'k*','linewidth',2);
+%         missBound(j) = sum(subNumberOfcollision(j,:)>UpperBoundCollision1(1,j))/length(start_indices);
+% 
+% end
+
+% h1 = plot(mc,(meanCollision),'b','linewidth',2);
+% h2 = plot(mc(3:end),(bound_collision(3:end,2)),'r--','linewidth',2);
+ax = gca;
+ax.XAxis.TickLabels{1} = 'IRIS';
+% legend([h0_coll,h1_coll,h2_coll],'Avarage-IRIS','Avarage','Lower bound','location','best')
+
+
+xlabel('$m$','fontsize',12,'fontsize',12,'Interpreter','latex')
+ylabel('Collision probability','fontsize',12)
+hold on;
+
+% figure(99)
+% plot(mc1(i,:),missBound,'linewidth',2);
+% xlabel('$m$','fontsize',12,'fontsize',12,'Interpreter','latex')
+% ylabel('missBound','fontsize',12)
+
+% ylim([0,1])
+% ylim([0,40])
+
+% savefig(f2, figure_path2, 'compact');  %   Compressed fig. Can only be opened in MATLAB 2014b or above.
+% print(f2, figure_path2, '-dpdf');
+ax = gca;
+ax.FontSize = 12;
+xlim([min(mc1(1,3:end)) max(mc1)])
+
+%%
+%subplot(2,2,3)
+% close all
+f = figure(3);
+f.Position = [100 100 700 200];
+% set(gca, 'YScale', 'log')
+% yticks([200:200:1200])
+hold on; box on; grid on;
+% title('Execution path length')
+temp = 0;
+% Total_length_simulation=zeros(length(runNumber{i}.OutputUAVsimulation.Total_length_simulation),length(runNumber));
+Total_length_simulation = runNumber{1}.lengthVectorsimulation;
+Total_length_IRIS = cell(1,1);
+for i=1:1:length(runNumber)
+    Total_length_simulation(:,i) = runNumber{i}.lengthVectorsimulation;
+    %     if (i>1)
+    Total_length_IRIS{i} = runNumber{i}.lengthVectorIRIS(1,:)';
+    %     end
+end
+
+xlabel('$m$','fontsize',12,'fontsize',12,'Interpreter','latex')
+ylabel('Path length [m]','fontsize',12)
+%   Save results
+
+bound_length_individual = zeros(1,2);
+bound_length = zeros(1,2);
+bound_length_mean = zeros(1,2);
+temp_lower = [0,0];
+mc=1;
+totalLengthMean =1;
+for i=1:1:length(runNumber)
+    mc(i) = runNumber{i}.MC_number;
+    totalLengthMean(i) = mean(Total_length_simulation(:,i));
+    if(runNumber{i}.MC_number>1)
+        xraw = runNumber{i}.lengthVectorIRIS;
+     
+        
+        x_current = xraw(1,:);
+        interval=ciFunc(x_current,95);
+        ci(1) = -interval;
+        ci(2) = interval;
+        temp(1:2) = mean(x_current)+ci;
+        bound_length_mean(i,:) = temp;
+        
+        x_current = xraw(1,:);
+%         alpha = 0.05;
+        N = length(x_current);
+        SD1 = std(x_current);
+        UpperlimitStd =SD1*sqrt((N-1)/chi2inv((alpha/2), N-1));
+        %                     LowerlimitStd =SD1*sqrt((N-1)/chi2inv(1-(alpha/2), N-1));
+        
+        temp(1) = temp(1)-3*UpperlimitStd;
+        temp(2) = temp(2) +3*UpperlimitStd;
+        bound_length(i,:) =  temp; 
+    end
+end
+
+start_indices =1;%start_indices = find(mc == mc(1));
+mc1 = reshape(mc, [diff_startIndex length(start_indices)])';
+meantotalLengthMean1 = reshape(totalLengthMean, [diff_startIndex length(start_indices)])';
+LowerBoundLength1 = bound_length_mean(:,1);
+LowerBoundLength1 = reshape(LowerBoundLength1, [diff_startIndex length(start_indices)])';
+UpperBoundLength1 = bound_length_mean(:,2);
+UpperBoundLength1 = reshape(UpperBoundLength1, [diff_startIndex length(start_indices)])';
+
+LowerBoundLength_total1 = bound_length(:,1);
+LowerBoundLength_total1 = reshape(LowerBoundLength_total1, [diff_startIndex length(start_indices)])';
+UpperBoundLength_total1 = bound_length(:,2);
+UpperBoundLength_total1 = reshape(UpperBoundLength_total1, [diff_startIndex length(start_indices)])';
+
+
+%mc2 = mc(start_indices(1):start_indices(2)-1);
+meantotalLengthMean2 = mean(meantotalLengthMean1);
+LowerBoundLength2 = mean(LowerBoundLength1);
+UpperBoundLength2 = mean(UpperBoundLength1);
+UpperBoundCollision2 = mean(UpperBoundCollision1);
+LowerBoundLength_total2 = mean(LowerBoundLength_total1);
+UpperBoundLength_total2 = mean(UpperBoundLength_total1);
+
+for i=1:1:length(start_indices)
+    
+%     
+%     h0_length= plot(mc1(i,1),(meantotalLengthMean1(i,1)),'-*','color',colorIris,'linewidth',2);
+%     h1_length= plot(mc1(i,3:end),(meantotalLengthMean1(i,3:end)),'-*','color',colorIris_u,'linewidth',2);
+% h2_length =plot(mc1(i,3:end),(LowerBoundLength1(i,3:end)),'--','color',colorBoundMean,'linewidth',2);
+%     h2_length =plot(mc1(i,3:end),(UpperBoundLength1(i,3:end)),'--','color',colorBoundMean,'linewidth',2);
+% h3_length =plot(mc1(i,3:end),(LowerBoundLength_total1(i,3:end)),'--','color',colorBoundAll,'linewidth',2);
+%     h3_length =plot(mc1(i,3:end),(UpperBoundLength_total1(i,3:end)),'--','color',colorBoundAll,'linewidth',2);
+
+      h0_length_IRIS= plot([mc1(i,3),mc1(i,end)],[(meantotalLengthMean1(i,1)),(meantotalLengthMean1(i,1))],'r-','color',colorIris,'linewidth',2);
+    h0_length_LUM= plot([mc1(i,3),mc1(i,end)],[(meantotalLengthMean1(i,2)),(meantotalLengthMean1(i,2))],'y-','color',colorLum,'linewidth',2);
+    h1_length= plot(mc1(i,3:end),(meantotalLengthMean1(i,3:end)),'-*','color',colorIris_u,'linewidth',2);
+h2_length =plot(mc1(i,3:end),(LowerBoundLength1(i,3:end)),'--','color',colorBoundMean,'linewidth',2);
+    h2_length =plot(mc1(i,3:end),(UpperBoundLength1(i,3:end)),'--','color',colorBoundMean,'linewidth',2);
+h3_length =plot(mc1(i,3:end),(LowerBoundLength_total1(i,3:end)),'--','color',colorBoundAll,'linewidth',2);
+    h3_length =plot(mc1(i,3:end),(UpperBoundLength_total1(i,3:end)),'--','color',colorBoundAll,'linewidth',2);
+    
+    
+%     h1 = plot(mc1(i,:),(meantotalLengthMean1(i,:)),'b*','linewidth',2);
+%     h2 = plot(mc1(i,3:end),(LowerBoundLength1(i,3:end)),'r--','linewidth',2);
+%     h2 = plot(mc1(i,3:end),(UpperBoundLength1(i,3:end)),'r--','linewidth',2);
+%     h3 = plot(mc1(i,3:end),(LowerBoundLength_total1(i,3:end)),'k--','linewidth',2);
+%     h3 = plot(mc1(i,3:end),(UpperBoundLength_total1(i,3:end)),'k--','linewidth',2);
+end
+
+
+
+
+% h1 = plot(mc,(totalLengthMean),'b','linewidth',2);
+% h2 = plot(mc(3:end),(bound_length_mean(3:end,1)),'r--','linewidth',2);
+% h2 = plot(mc(3:end),(bound_length_mean(3:end,2)),'r--','linewidth',2);
+% h3 = plot(mc(3:end),(bound_length(3:end,1)),'k--','linewidth',2);
+% h3 = plot(mc(3:end),(bound_length(3:end,2)),'k--','linewidth',2);
+
+
+ax = gca;
+ax.XAxis.TickLabels{1} = 'IRIS';
+% legend([h0_length,h1_length,h2_length,h3_length],'Avarage-IRIS','Avarage','CI for Avarage','CI for 3\sigma','location','best')
+
+% ylim([min(min([bound_length,Total_length_simulation'])) max(max([bound_length,Total_length_simulation']))])
+% legend([h1,h2],'CI for 3\sigma','CI for mean','location','best')
+
+% size(temp(Total_length_simulation > bound_length(1) & Total_length_simulation < bound_length(2)))
+%
+ax = gca;
+ax.FontSize = 12;
+xlim([min(mc1(1,3:end)) max(mc1)])
+
+%%
+%subplot(2,2,4)
+titleXlabel = 'm';
+f = figure(4);
+f.Position = [100 100 700 200];
+hold on; box on; grid on;
+% title('execution path length')
+RunNumberVec = 0;
+SearchTimeVec = 0;
+
+mc=1;
+for i=1:1:length(runNumber)
+    mc(i) = runNumber{i}.MC_number;
+    SearchTimeVec(i) = runNumber{i}.SearchTime/1000;  
+end
+
+start_indices =1;%start_indices = find(mc == mc(1));
+mc1 = reshape(mc, [diff_startIndex length(start_indices)])';
+SearchTimeVec1 = reshape(SearchTimeVec, [diff_startIndex length(start_indices)])';
+
+%mc2 = mc(start_indices(1):start_indices(2)-1);
+meantotalLengthMean2 = mean(SearchTimeVec1);
+
+for i=1:1:length(start_indices)
+%     h1= plot(mc1(i,:),(SearchTimeVec1(i,:)),'b*','linewidth',2);
+%     
+%      h0_time= plot(mc1(i,1),(SearchTimeVec1(i,1)),'-*','color',colorIris,'linewidth',2);
+%     h1_time= plot(mc1(i,3:end),(SearchTimeVec1(i,3:end)),'-*','color',colorIris_u,'linewidth',2);
+%     
+      h0_time_IRIS= plot([mc1(i,3),mc1(i,end)],[(SearchTimeVec1(i,1)),(SearchTimeVec1(i,1))],'r-','color',colorIris,'linewidth',2);
+    h0_time_LUM= plot([mc1(i,3),mc1(i,end)],[(SearchTimeVec1(i,2)),(SearchTimeVec1(i,2))],'y-','color',colorLum,'linewidth',2);
+    h1_time= plot(mc1(i,3:end),(SearchTimeVec1(i,3:end)),'-*','color',colorIris_u,'linewidth',2);
+    
+end
+% for i=1:1:length(start_indices)/5
+%     h1= plot(mc1(i,3:end),(SearchTimeVec1(i,3:end)),'linewidth',2);
+% end
+% xlabel('$m$ for $\langle m,\kappa \rangle$','fontsize',12,'Interpreter','latex')
+% ylabel('Search time [s]','fontsize',12)
+% legend('$\hat{p}_{desired}^- = 1$','$\hat{p}_{desired}^- = 0.97$','$\hat{p}_{desired}^- = 0.93$','$\hat{p}_{desired}^- = 0.9$','location','best','Interpreter','latex');
+
+% plot(RunNumberVec,(SearchTimeVec),'b','Linewidth',3)
+title('Search Time')
+xlabel('$m$','fontsize',12,'fontsize',12,'Interpreter','latex')
+ylabel(' Search Time [s]','fontsize',12)
+set(gca, 'YScale', 'log')
+% yticks([0.5 25 50 100 150])
+yticks([0.5 25 100 600 1500 5000])
+yticks([0.001 0.005 0.01 0.05 0.2 0.5])
+ylim([min((SearchTimeVec)),max(SearchTimeVec)+1])
+
+ax = gca;
+ax.XAxis.TickLabels{1} = 'IRIS';
+% savefig(f5, figure_path5, 'compact');  %   Compressed fig. Can only be opened in MATLAB 2014b or above.
+% print(f5, figure_path5, '-dpdf');
+ax = gca;
+ax.FontSize = 12;
+
+% legend([h0_time,h1_time],'Avarage-IRIS','Avarage','CI for 3\sigma','location','best')
+xlim([min(mc1(1,3:end)) max(mc1)])
+
+%%
+% h_fig_1 = [h0_POI,h1_POI,h2_POI];
+% h_fig_2 = [h0_coll,h1_coll,h2_coll];
+% h_fig_3 =  [h0_length,h1_length,h2_length,h3_length];
+% h_fig_4 =  [h0_time,h1_time];
+%%
+figure(1);
+legend([h_fig_1(1),h1_POI,h_fig_1(2),h_fig_1(3)],'Avarage-IRIS','Avarage-LUM','Avarage-IRIS-U^2','Lower bound IRIS-U^2','location','best')
+figure(2);
+legend([h_fig_2(1),h1_coll,h_fig_2(2),h_fig_2(3)],'Avarage-IRIS','Avarage-LUM','Avarage-IRIS-U^2','Upper bound','location','best')
+figure(3);
+legend([h_fig_3(1),h1_length,h_fig_2(2),h_fig_2(3),h_fig_3(4),h2_length,h3_length],'Avarage-IRIS','Avarage-LUM','Avarage-IRIS-U^2','CI for Avarage IRIS-U^2','CI for 3\sigma IRIS-U^2','CI for Avarage LUM','CI for 3\sigma LUM','location','best','Orientation', 'horizontal')
+legendHandle = findobj(gcf, 'Type', 'Legend');
+set(gcf, 'Units', 'pixels', 'Position', legendHandle.Position);
+
+figure(4);
+legend([h_fig_4(1),h1_time,h_fig_4(2)],'Avarage-IRIS','Avarage-LUM','Avarage-IRIS-U^2','CI for 3\sigma','location','best')
+
+

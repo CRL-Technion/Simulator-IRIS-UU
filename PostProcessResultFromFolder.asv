@@ -1,5 +1,5 @@
 % close all
-% clear all
+clear all
 addpath Command
 
 % folderDir = 'C:\Users\david\OneDrive\DocumentsProjects\Thesis\‏‏‏‏result_061120';
@@ -56,19 +56,9 @@ folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\R
 folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏bridge_simplify_100_MC_test_4bias';
 
 folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\bridge_simple_10000_MC_no_IPV';
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\toy_simple_10000_MC_no_IPV_no_outages';
+folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\‏‏‏‏‏‏‏‏‏‏‏‏‏‏bridge_simple_10000_MC_test2';
 
 
-
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\Toy_10000_mc';
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\Toy_10000_mc_no_IPV';
-
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\‏‏Toy_10000_mc_combine';
-
-
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\‏‏Bridge_simple_mc_combine';
-
-folderDir = '\\wsl.localhost\Ubuntu-20.04\home\davidalpert\Projects\IRIS\build\Results\‏‏Bridge_simplify_mc_combine';
 
 isCost = 0;
 isMC=1;
@@ -145,7 +135,7 @@ for i=3:1:length(subFoldersNames)
     runNumber{str2num(subFoldersNames(i).name(4:end))}.Nodes =sum(temp(end-2:end));%temp(end-5);%
     runNumber{str2num(subFoldersNames(i).name(4:end))}.SearchTime =(temp(end-5));%temp(end-5);%
     runNumber{str2num(subFoldersNames(i).name(4:end))}.POI_coverage =(temp(5));%temp(end-5);%
-    runNumber{str2num(subFoldersNames(i).name(4:end))}.req_POI_coverage =temp(2);%(temp(2)*temp(3));%temp(end-5);%
+    runNumber{str2num(subFoldersNames(i).name(4:end))}.req_POI_coverage =(temp(2)*temp(3));%temp(end-5);%
     runNumber{str2num(subFoldersNames(i).name(4:end))}.ideal_POI_coverage =(temp(2));%temp(end-5);%
 
     a=1;
@@ -177,8 +167,8 @@ temp = importdata([folderDir,'\',subFoldersNames(i).name,'\testIRIS_resultMC'],'
     end
        try
 %            continue
-        temp = importdata([folderDir,'\',subFoldersNames(i).name,'\SimulationPath_testIRIS_MC']);
-%         temp = importdata([folderDir,'\',subFoldersNames(i).name,'\testIRIS_MC']);
+%         temp = importdata([folderDir,'\',subFoldersNames(i).name,'\SimulationPath_testIRIS_MC']);
+        temp = importdata([folderDir,'\',subFoldersNames(i).name,'\testIRIS_MC']);
     catch
         continue
     end
@@ -238,9 +228,7 @@ titleXlabel = 'Method';
 
 % plotCI;
 % plotCIOnlyIRISuu;
-% PlotCINew;
-PlotCINewCombine;
-% PlotCIBaseLine;
+PlotCINew;
 return;
 
 

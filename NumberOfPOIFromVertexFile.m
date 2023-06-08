@@ -1,4 +1,4 @@
-function POIUnique = NumberOfPOIFromVertexFile(fileVertexName)
+function [POIUnique,POICell] = NumberOfPOIFromVertexFile(fileVertexName)
 
 % fid = fopen([folder,'_vertex']);
 fid = fopen(fileVertexName);

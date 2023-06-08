@@ -6,6 +6,7 @@ degPerHr2radPerSec = (pi/180)/3600; %   Conversion from [deg/hr] to [rad/s]
 dt = ScenarioParameter.dt;
 
 IMUParameters.b_a =10*milli_g2mpss*ones(3,1);
+% IMUParameters.b_a(3) = 0;%todo simple test only
 IMUParameters.w_a = 1*milli_g2mpss;%/sqrt(ScenarioParameter.dt);
 IMUParameters.M_a = zeros(3,3);
 IMUParameters.S_a = zeros(3,3);

@@ -29,13 +29,16 @@ close all
 
 % z = norminv(1-(1-0.9)/2);
 p = 0.5;
-n = 0:0.1:500;
-CI = [0.1:0.001:0.3];
+n = 0:0.01:500;
+CI = 0.1;
 [X,Y] = meshgrid(n,CI);
 
 figure(1)
 hold on;grid on;box on;
-
+plot(n,CL,'linewidth',2)
+xlabel('#Samples')
+ylabel('Confidence Level')
+title({'Confidence Level Vs. Samples', ['Probability = 0.5, CI = 0.1']})
 
 CL = zeros(length(n),length(CI));
 for i=1:1:length(CI)
@@ -44,11 +47,17 @@ CL(:,i) = CLfromCI(CI(i),n,p);
 
 end
 contourf(X,Y,CL')
+% contourf(CL',Y,X)
+
 colorbar
 xlabel('#Samples')
 ylabel('Confidence Interval')
 title({'Confidence Level: Probability Vs. Samples', ['Probability = 0.5']})
-
+caxis(0,1)
+% xlabel('Confidence Level')
+% ylabel('Confidence Interval')
+% title({'#Samples : CI Vs. CL', ['Probability = 0.5']})
+% xlim([0.4,1])
 
 
 %%

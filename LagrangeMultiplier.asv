@@ -1,0 +1,50 @@
+ clc
+ clear all
+ close all
+ n = 20; %number of MC
+ k = 27; %size of POI
+ alpha = 0.05;
+ v=['[' sprintf('p%d,',1:k)];
+v(end)=']'
+p=str2sym(v)
+
+syms a;
+x = a*n;
+
+% Lower limits
+nu1 = 2*x;
+nu2 = 2*(n-x+1);
+F   = finv(alpha/2,nu1,nu2);
+lb  = (nu1.*F)./(nu2 + nu1.*F);
+ 
+
+
+
+
+ pci=statbinoci(x,n,alpha);
+ 
+ 
+lb = [-3 -3]; % lower bounds
+ub = [3 3]; % upper bounds
+A = [1 1]; % linear inequality x(1) + x(2) <= 1
+b = 1;
+Aeq = [];
+beq = [];
+x0 = [-1 1];
+fun = @(x)100*(x(2) - x(1)^2)^2 + (1 - x(1))^2; % Rosenbrock function
+nlcons = @(x)deal(x(1)^2 + x(2)^2 - 1,[]); % nonlinear inequality
+options = optimoptions('fmincon','Display','off');
+[x,fval,exitflag,output,lambda] = ...
+    fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nlcons,options);
+
+disp(lambda)
+%%
+
+
+for i_p=1:1:length(p)
+        x =p(i_p)*ones(mc(i_mc),1);
+        [phat,pci] = binofit((sum(x)),length(x),alpha);
+        index = index+1;
+        ci_lower(i_mc,i_p) = pci(1)*100;
+        ci_lower(i_mc,i_p)  = 100*(1- betainv(1-alpha/2,(length(x)-sum(x)),(sum(x))+1));
+    end

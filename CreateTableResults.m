@@ -1,6 +1,23 @@
- 
-%% todo output with one file
-POIUniqueSimualtion = NumberOfPOIFromVertexFile([IRIS_build_folder,'\',OutputFileName,'_vertex']);
+% 
+% %% todo output with one file
+% b = 0;
+% [POIUniqueSimualtion,POICellSimulation] = NumberOfPOIFromVertexFile([IRIS_build_folder,'\',OutputFileName,'_vertex']);
+% for ii=1:1:length(POICellSimulation)
+%     if (length(Command.POICell{Command.vertexTrajectoryTempForIndex(ii)})>0)
+%         b(ii) = length(intersect(POICellSimulation{ii},Command.POICell{Command.vertexTrajectoryTempForIndex(ii)}))/length(Command.POICell{Command.vertexTrajectoryTempForIndex(ii)});
+%     else
+%         b(ii) = 0;
+%     end
+%     
+% end
+% 
+% figure(1)
+% grid on;hold on; box on
+% plot(Command.TimeInLocationError,b,'b*')
+% drawnow
+%%
+
+[POIUniqueSimualtion,POICellSimulation] = NumberOfPOIFromVertexFile([IRIS_build_folder,'\',OutputFileName,'_vertex']);
 temp = importdata([OutputFolderName,'/testIRIS']);
 Inspected_POIs_desire = temp(end,2)*temp(end,3);
 % Inspected_POIs_desire = length(Command.POIUnique);
@@ -36,6 +53,10 @@ totalOptimalPOIIRIS = length(unique([WCovRegion_POI_SearchSpace,WOutagesRegion_P
 totalOptimalPOISimulation = length(unique([WOutagesRegion_POI_palnned,WCovRegion_POI_palnned]));
 
 percentageOfPOI = Planned_Inspected_POIs_simulation/Inspected_POIs_desire*100;
+%%Only for p=1
+
+% percentageOfPOI = Total_Inspected_POIs_simulation/Inspected_POIs_desire*100;
+
 percentageLocationError = sum_length_in_location_error/Total_length_simulation*100;
 percentage_total_location_error = total_location_error/Total_length_simulation*100;
 MainOutputVar = table(seed,num_vertex,initial_p,initial_eps,tightening_rate,method,...

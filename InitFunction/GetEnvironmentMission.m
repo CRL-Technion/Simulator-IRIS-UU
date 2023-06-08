@@ -5,7 +5,8 @@ function [Environment]= GetEnvironmentMission(Rootfolder)
 
 % Environment.TargetsBridge = importdata([Rootfolder,'\TargetsBridge']);
 % Environment.BridgeObstaclePoint = importdata([Rootfolder,'\BridgeObstaclePoint']);
-BridgeObj = readObj([Rootfolder,'bridge.obj']);
+BridgeObj = readObj([Rootfolder,'bridge_small.obj']);
+% BridgeObj = readObj([Rootfolder,'bridgeTestLarge.obj']);
 
 % BridgeObj=read_wobj([Rootfolder,'bridge.obj'])
 % BridgeObj = read_wobj([Rootfolder,'bridge.obj']);
@@ -31,13 +32,14 @@ Environment.TimeOfCollision=0;
 TargetPoint = (zeros(1,3));
 index =0;
 for i=1:1:length(Environment.BridgeObjRaw(:,1))
-    v = Environment.BridgeObjRaw(i,:);
+    v = Environment.BridgeObjRaw(i,1:3);
     if i==1
         index = index +1;
         TargetPoint(index,:) = v;
     else
         [~,index_min] = min(vecnorm((TargetPoint-v)'));
-        if (norm(TargetPoint(index_min,:)-v)<1e-3)
+%         if (norm(TargetPoint(index_min,:)-v)<1e-3)
+        if (norm(TargetPoint(index_min,:)-v)<5.5)
             continue;
         end
         index = index +1;

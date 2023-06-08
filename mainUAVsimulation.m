@@ -1,14 +1,90 @@
 % Change the current folder to the folder of this m-file.
-
-if(~isdeployed)
-  cd(fileparts(which(mfilename)));
-end
+% 
+% if(~isdeployed)
+%   cd(fileparts(which(mfilename)));
+% end
 addpath InitFunction
 addpath ServiceFunction
 addpath Control
 addpath Command
 addpath PostProcess
 addpath StepFunction
+
+% SimplifiedMotionModel;
+% return;
+%
+% pause(0.3)
+% 
+% Command = InitCommand(file_to_write,OutputFolderName);
+% PoseUpdateTheta = Command.Pose_des_GF;
+% 
+% % noise = 1.5;
+% % 
+% %   State.X = Command.Pose_des_GF(1,1:3)';
+% %     if (checkGPSAvailable(State))
+% %                     r = abs(rand_mu_sigma(0,1,1,1)*1);
+% %     else
+% %                     r = abs(rand_mu_sigma(0,1,1,1)*3);
+% %     end
+% %                azimuth = rand_mu_sigma(0,2*pi,1,1);
+% %             elevation = rand_mu_sigma(0,2*pi,1,1);
+% % lastError = [
+% %     r * cos(elevation) * cos(azimuth)
+% % r * cos(elevation) * sin(azimuth)
+% % -r * sin(elevation)];
+% for i=2:1:length(Command.Pose_des_GF(:,1))
+%     State.X = Command.Pose_des_GF(i,1:3)';
+%     if (checkGPSAvailable(State))
+%                     r = abs(rand_mu_sigma(0,1,1,1)*1);
+%     else
+%                     r = abs(rand_mu_sigma(0,1,1,1)*3);
+%     end 
+%                azimuth = rand_mu_sigma(0,2*pi,1,1);
+%             elevation = rand_mu_sigma(0,2*pi,1,1);
+% lastError = [
+%     r * cos(elevation) * cos(azimuth)
+% r * cos(elevation) * sin(azimuth)
+% -r * sin(elevation)];
+%     PoseUpdateTheta(i,1:3) = (Command.Pose_des_GF(i,1:3)'+lastError)';
+%     
+% end
+% fileName = fopen([IRIS_build_folder,'\',OutputFileName,'_',file_to_write],'w');
+% % fileName = fopen([OutputFileName,'_',file_to_write],'w');
+% % Writing data to file
+% fprintf(fileName, '%f %f %f %f %f\n', PoseUpdateTheta');
+% % Closing
+% fclose(fileName)
+% 
+% ScenarioParameter = InitScenario;
+% IMUParameters = InitIMU(ScenarioParameter);
+% Quad = InitQuad;
+% Control = InitControl;
+% Command = InitCommand(file_to_write,OutputFolderName);
+% 
+% [State,Command] = InitState(IMUParameters,Command,ScenarioParameter.ScenarioMode);
+% [NavState,Command] = InitNavState(Command,State,ScenarioParameter);
+% 
+% Command.PoseSimulation = [State.X',State.psi,State.theta,NavState.theta,0];
+% 
+% EKF = InitEKF(NavState,IMUParameters,ScenarioParameter);
+% DynamicStateParameter = InitDynamic(ScenarioParameter,State);
+% SensorMeas = GetSensorMeas(DynamicStateParameter,IMUParameters);
+% DynamicNavStateParameter = UpdateNavDynamic(SensorMeas,NavState);
+% State = UpdateTrueIMUBias(SensorMeas,DynamicStateParameter,State);
+% 
+% 
+% InitRecordParameter;%[RecordState,RecordNavState,RecordEKF,RecordCommand,RecordScenarioParameter]= InitRecordParameter(State,NavState,EKF,1);
+% time = 0;
+% t = 0;
+% Path_Length = 0;
+% length_in_location_error = 0;
+% time_in_location_error = 0;
+% temp_length_in_location_error=0;
+% temp_time_in_location_error = 0;
+% 
+% save([OutputFolderName,'UAVSimulationResults'],'RecordState','RecordNavState','RecordScenarioParameter','RecordCommand','RecordEKF'...
+%     ,'Command','length_in_location_error','Path_Length','IMUParameters','ScenarioParameter','time_in_location_error')
+% return;
 
 %% Init
 ScenarioParameter = InitScenario;
@@ -37,6 +113,8 @@ length_in_location_error = 0;
 time_in_location_error = 0;
 temp_length_in_location_error=0;
 temp_time_in_location_error = 0;
+
+
 %% Step
 for i=1:1:(ScenarioParameter.FinalTime/ScenarioParameter.dt)
     
@@ -65,9 +143,14 @@ for i=1:1:(ScenarioParameter.FinalTime/ScenarioParameter.dt)
     if (Command.Finish_pose_command )
         break;
     end
+    if (ScenarioParameter.isGPSAvailable)
+        timeInRiskZone = 0;
+    else
+        timeInRiskZone = time_in_location_error(end);
+    end
     if (ScenarioParameter.ScenarioMode>0)% not static
         
-        [Command,Control]=UpdateCommandAndInitlizeControl(State,Command,Control,NavState,ScenarioParameter.ScenarioMode,i);
+        [Command,Control]=UpdateCommandAndInitlizeControl(State,Command,Control,NavState,ScenarioParameter.ScenarioMode,i,timeInRiskZone);
     end
     %         checkPOI;%Command = checkPOI(State,Environment,Command);
     %         CheckCollision;%Environment= CheckCollision(Environment,State,time);
@@ -130,8 +213,9 @@ end
 time = t;
 thetaTrueSimulation = Command.PoseSimulation(:,5);
 thetaNavSimulation = Command.PoseSimulation(:,6);
-thetaCamera = Command.Pose_des_GF(:,5) -  thetaNavSimulation + thetaTrueSimulation;
-PoseUpdateTheta = [Command.PoseSimulation(:,1:4),thetaCamera];%thetaCamera];
+% thetaCamera = Command.Pose_des_GF(:,5) -  thetaNavSimulation + thetaTrueSimulation;
+% PoseUpdateTheta = [Command.PoseSimulation(:,1:4),thetaCamera];%thetaCamera];
+PoseUpdateTheta = [Command.PoseSimulation(:,1:3),Command.Pose_des_GF(:,4:5)];%thetaCamera];
 fileName = fopen([IRIS_build_folder,'\',OutputFileName,'_',file_to_write],'w');
 % fileName = fopen([OutputFileName,'_',file_to_write],'w');
 % Writing data to file

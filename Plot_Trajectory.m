@@ -1,3 +1,4 @@
+figure(2)
 close all
 CreateVideoFromMatlab = 1;%%notRecommended
 nameOfVideoFile = 'myVideo';
@@ -5,10 +6,23 @@ nameOfVideoFile = 'myVideo';
 init_plot;
 define_quad_model;
 
-patch('vertices', Environment.obj.v, 'faces', Environment.obj.f.v, ...
-    'FaceVertexCData', rand(length(Environment.obj.v),1));
-shading interp
-alpha(.1)
+OBJ=read_wobj('C:\Users\david\Downloads\objTest\simpleExample.obj');
+
+FV.vertices=OBJ.vertices;
+%   FV.faces=[
+%   OBJ.objects(3).data.vertices
+%     OBJ.objects(7).data.vertices;
+%   OBJ.objects(11).data.vertices];
+ FV.faces=[
+  OBJ.objects(4).data.vertices
+    OBJ.objects(8).data.vertices
+  OBJ.objects(12).data.vertices
+  OBJ.objects(16).data.vertices];
+%   OBJ.objects(20).data.vertices
+%   OBJ.objects(24).data.vertices];
+
+  h1 = patch(FV,'facecolor',[1 0 0]); camlight
+
 % axis square;
 axis equal;
 
@@ -32,7 +46,7 @@ view([  -55.3504,     15.9789]);
 % [caz,cel] = view(v)
 xlim([[RecordState.X(1,1)]-50,[RecordState.X(1,1)]+50])
 indexInspectedPOI = 0;
-h6 = plot3(-100000,RecordState.X(2,i),RecordState.X(3,i),'k*','LineWidth',15)
+h6 = plot3(RecordState.X(1,i),RecordState.X(2,i),RecordState.X(3,i),'k*','LineWidth',15)
 xlim([[RecordState.X(1,1)]-50,[RecordState.X(1,1)]+50])
 
 NumberOfCollision = 0;

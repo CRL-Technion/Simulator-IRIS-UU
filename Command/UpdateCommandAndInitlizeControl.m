@@ -1,4 +1,4 @@
-function [Command,Control]=UpdateCommandAndInitlizeControl(State,Command,Control,NavState,ScenarioMode,i)
+function [Command,Control]=UpdateCommandAndInitlizeControl(State,Command,Control,NavState,ScenarioMode,i,time_in_location_error)
 
 if (Command.index_Pose_des_GF > length(Command.Pose_des_GF(:,1)))
     Command.Finish_pose_command = 1;
@@ -15,12 +15,14 @@ conditionErrorPos = errorPose < Command.Tolerance_pose_des(1,1);
 
 conditionErrorPsi = errorPsi < Command.Tolerance_pose_des(1,2);
 
-if (conditionErrorPos && conditionErrorPsi) %Finsish current command
+% if (conditionErrorPos && conditionErrorPsi) %Finsish current command
+    if (conditionErrorPos) %Finsish current command
+
     Command.PoseSimulation(Command.index_Pose_des_GF,:) = [State.X',State.psi,State.theta,NavState.theta,i]; 
 
     L=length(Command.Pose_des_GF(:,1));
     if (Command.index_Pose_des_GF<L)
-
+        Command.TimeInLocationError(Command.index_Pose_des_GF) = time_in_location_error;
         Command.index_Pose_des_GF = Command.index_Pose_des_GF+1;
         Control.init = 0;
         display([num2str(Command.index_Pose_des_GF/L*100),'%']);
@@ -30,6 +32,8 @@ if (conditionErrorPos && conditionErrorPsi) %Finsish current command
             Command.Finish_pose_command=0;
         else
             Command.Finish_pose_command = 1;
+            Command.TimeInLocationError(Command.index_Pose_des_GF) = time_in_location_error;
+            
         end
     end
 end

@@ -18,7 +18,7 @@ for i=1:1:length(p)
 %          end
 % 
 %     end
-   sigma = sqrt(n./(p(i)*(1-p(i))));
+    sigma = sqrt(n./(p(i)*(1-p(i))));
     z = CI*sigma;
     for j=1:1:length(z)
          temp = normcdf([-z(j) z(j)]);
