@@ -1,7 +1,9 @@
+% Clear the workspace and command window
 clc
 clear
 
-%% Include path
+%% Include necessary paths
+% Add paths to the required functions and modules
 addpath InitFunction
 addpath ServiceFunction
 addpath Control
@@ -9,44 +11,47 @@ addpath Command
 addpath PostProcess
 addpath StepFunction
 addpath Movie_function
-%% load command infromation from IRIS planing
+
+%% Load command information from IRIS planning
+% Set the path to the IRIS build folder and result path and the desired OutputSimulationPath
 IRIS_build_folder = '\\wsl.localhost\Ubuntu\home\davidalpert11\Projects\IRIS-UU\build';
 Result_path = 'Results\test\';
 file_to_write = 'testIRIS';
+OutputSimulationPath = 'OutputSimulation';
+
 OutputIRISFolderName = [IRIS_build_folder,'\',Result_path];
 
-OutputSimulationPath = 'OutputSimulation';
+% Initialize command
 Command = InitCommand(file_to_write,OutputIRISFolderName);
 
 %% Run the simulation
-mainUAVsimulation(Command);
+% Execute the main simulation function with the provided command
+mainUAVsimulation(Command,OutputSimulationPath);
 
-%% Check POI and Collision
-
-%path to the output result of iris (in the ubuntu machine)
-%the file has to be reconise in ubuntu
+%% Check Points of Interest (POI) and Collision
+% Load the simulation results from the specified path
 load([OutputSimulationPath,'\UAVSimulationResults']);
+
+% Define the result path for simulation vertices
 Result_path_simulation_vertex_relative_to_build = [Result_path,'SimulationPath_',file_to_write];
-
-
-[IRIS_build_folder,'\Results\test'];
 Result_path_simulation_vertex = [IRIS_build_folder,'\',Result_path_simulation_vertex_relative_to_build];
+
+% Write the simulation results to a file
 fileName = fopen(Result_path_simulation_vertex,'w');
 fprintf(fileName, '%f %f %f %f %f\n', PoseUpdateTheta');
-% Closing
-fclose(fileName)
+fclose(fileName);
 
-
-seed =num2str(2);
-
+% Call the PowerShell script to check POI and collision
+seed = num2str(2);
 CommandToPowershell = ['powershell cd ',IRIS_build_folder,'; wsl '];
-system([CommandToPowershell,'./app/checkPOIandCollision_simulator ',strrep(Result_path_simulation_vertex_relative_to_build, '\', '/'),' ',seed])
+system([CommandToPowershell,'./app/checkPOIandCollision_simulator ',strrep(Result_path_simulation_vertex_relative_to_build, '\', '/'),' ',seed]);
 
-%% Creat a video
+%% Create a video
+% Define paths and filenames for video creation
 obj_path = '\\wsl.localhost\Ubuntu\home\davidalpert11\Projects\IRIS-UU\data\bridge\bridge.obj';
 output_record_path_simulation = 'OutputSimulation';
 output_iris ='\\wsl.localhost\Ubuntu\home\davidalpert11\Projects\IRIS-UU\build\Results\test';
 nameOfVideoFile = 'Movies\test_video';
 
+% Call the Movie function to create the video
 Movie(nameOfVideoFile,obj_path,output_record_path_simulation,output_iris);
-

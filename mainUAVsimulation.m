@@ -1,4 +1,4 @@
-function mainUAVsimulation(Command)
+function mainUAVsimulation(Command,OutputSimulationPath)
 
 %% Init
 ScenarioParameter = InitScenario;
@@ -133,7 +133,7 @@ PoseUpdateTheta = [Command.PoseSimulation(:,1:3),Command.Pose_des_GF(:,4:5)];%th
 % % Closing
 % fclose(fileName)
 
-save([OutputFolderName,'UAVSimulationResults'],'RecordState','RecordNavState','RecordScenarioParameter','RecordCommand','RecordEKF'...
+save([OutputSimulationPath,'\UAVSimulationResults'],'RecordState','RecordNavState','RecordScenarioParameter','RecordCommand','RecordEKF'...
     ,'Command','length_in_location_error','Path_Length','IMUParameters','ScenarioParameter','time_in_location_error','PoseUpdateTheta');
 
 end
